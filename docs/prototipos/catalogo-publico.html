@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LLAM Biblioteca — Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ─── RESET ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ─── TOKENS ─── */
+:root{
+  --bg0:#0C0F14;
+  --bg1:#080B10;
+  --bg2:#0F1319;
+  --bg3:#141920;
+  --bg4:#1A2030;
+  --border:#1E2530;
+  --border2:#2A3444;
+  --text0:#E8E4DC;
+  --text1:#B8B2A8;
+  --text2:#7A8494;
+  --text3:#4A5568;
+  --text4:#2A3444;
+  --gold:#C9A84C;
+  --gold2:#D4B86A;
+  --gold-dim:#C9A84C18;
+  --blue:#378ADD;
+  --blue-dim:#378ADD18;
+  --green:#1D9E75;
+  --green-dim:#1D9E7518;
+  --red:#E24B4A;
+  --red-dim:#E24B4A18;
+  --amber:#EF9F27;
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg0);
+  color:var(--text0);
+  min-height:100vh;
+}
+
+/* ─── HEADER PÚBLICO ─── */
+.pub-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,11,16,.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;
+  padding:0 40px;height:60px;gap:32px;
+}
+.pub-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  font-family:'DM Serif Display',serif;font-size:17px;color:var(--text0);
+}
+.pub-logo-icon{
+  width:30px;height:30px;background:var(--gold);border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:15px;color:var(--bg0);font-weight:700;
+}
+.pub-logo span{color:var(--gold)}
+.pub-nav{display:flex;gap:4px;flex:1}
+.pub-nav-item{
+  padding:6px 14px;border-radius:7px;font-size:13px;color:var(--text2);
+  cursor:pointer;transition:all .15s;
+}
+.pub-nav-item:hover{color:var(--text0);background:var(--bg3)}
+.pub-nav-item.active{color:var(--text0);background:var(--bg3)}
+.pub-header-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.btn-login{
+  background:transparent;border:1px solid var(--border);border-radius:8px;
+  padding:7px 18px;font-size:13px;color:var(--text1);cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.btn-login:hover{border-color:var(--border2);color:var(--text0)}
+.btn-entrar{
+  background:var(--gold);border:none;border-radius:8px;
+  padding:7px 20px;font-size:13px;color:var(--bg0);cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-weight:500;transition:background .15s;
+}
+.btn-entrar:hover{background:var(--gold2)}
+
+/* avatar logado */
+.user-chip{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--border);border-radius:20px;
+  padding:4px 12px 4px 4px;
+}
+.user-chip-av{
+  width:26px;height:26px;border-radius:50%;background:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--bg0);font-weight:600;
+}
+.user-chip-name{font-size:12px;color:var(--text1)}
+
+/* ─── PÁGINAS ─── */
+.page{display:none}
+.page.active{display:block}
+
+/* ─── HERO BANNER ─── */
+.hero-banner{
+  background:var(--bg1);border-bottom:1px solid var(--border);
+  padding:40px 40px 36px;position:relative;overflow:hidden;
+}
+.hero-banner::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:360px;height:360px;border-radius:50%;
+  border:1px solid var(--border);pointer-events:none;
+}
+.hero-banner::after{
+  content:'';position:absolute;top:20px;right:20px;
+  width:200px;height:200px;border-radius:50%;
+  border:1px solid var(--gold);opacity:.1;pointer-events:none;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:14px;
+}
+.hero-tag::before{content:'';width:20px;height:1px;background:var(--gold)}
+.hero-title{
+  font-family:'DM Serif Display',serif;font-size:34px;line-height:1.1;
+  margin-bottom:10px;
+}
+.hero-title em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:14px;color:var(--text3);line-height:1.7;max-width:520px;font-weight:300}
+.hero-stats{display:flex;gap:32px;margin-top:24px}
+.hero-stat-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text0)}
+.hero-stat-lbl{font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* ─── TOOLBAR ─── */
+.toolbar{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 40px;border-bottom:1px solid var(--border);
+  background:var(--bg0);position:sticky;top:60px;z-index:40;
+}
+.search-wrap{position:relative;flex:1;max-width:380px}
+.search-wrap input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:9px;
+  padding:9px 36px 9px 14px;font-size:13px;color:var(--text0);
+  font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;
+}
+.search-wrap input:focus{border-color:var(--gold)}
+.search-wrap input::placeholder{color:var(--text4)}
+.search-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+select{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-size:12px;color:var(--text2);
+  font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+}
+.filter-check{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none}
+.cb{
+  width:15px;height:15px;border:1px solid var(--border);border-radius:4px;
+  background:var(--bg2);flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.cb.on{background:var(--gold);border-color:var(--gold)}
+.results-count{margin-left:auto;font-size:11px;color:var(--text3)}
+
+/* ─── GRID CATÁLOGO ─── */
+.catalog-wrap{padding:24px 40px 40px}
+.book-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:18px;
+}
+.book-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;cursor:pointer;transition:border-color .2s,transform .18s,box-shadow .18s;
+}
+.book-card:hover{
+  border-color:var(--border2);
+  transform:translateY(-3px);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.book-cover{
+  height:148px;display:flex;align-items:flex-end;padding:10px;
+  position:relative;overflow:hidden;
+}
+.book-cover-title{
+  font-family:'DM Serif Display',serif;font-size:12px;
+  color:rgba(255,255,255,.85);line-height:1.3;text-shadow:0 1px 4px rgba(0,0,0,.6);
+  position:relative;z-index:1;
+}
+.book-cover::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:70px;
+  background:linear-gradient(to top,rgba(0,0,0,.7),transparent);
+}
+.avail-pill{
+  position:absolute;top:8px;right:8px;
+  font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;z-index:1;
+}
+.avail-ok{background:#1D9E7540;color:#6FDBBB;border:1px solid #1D9E7530}
+.avail-none{background:#E24B4A30;color:#F08080;border:1px solid #E24B4A20}
+.avail-digital{background:#378ADD30;color:#80B8EE;border:1px solid #378ADD20}
+.book-info{padding:12px 12px 14px}
+.book-title{font-size:13px;font-weight:500;color:var(--text0);margin-bottom:3px;line-height:1.3}
+.book-author{font-size:11px;color:var(--text3);margin-bottom:10px}
+.book-category{font-size:10px;color:var(--text4);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em}
+.book-actions{display:flex;gap:6px}
+.ba{
+  flex:1;padding:6px 4px;border-radius:6px;font-size:10px;
+  font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;
+  border:none;text-align:center;transition:opacity .15s;
+}
+.ba:hover{opacity:.85}
+.ba-borrow{background:var(--gold);color:var(--bg0)}
+.ba-reserve{background:transparent;border:1px solid var(--border)!important;color:var(--text2)}
+.ba-pdf{background:var(--blue-dim);color:var(--blue);border:1px solid #378ADD25!important}
+
+/* ─── PAGINAÇÃO ─── */
+.pagination{
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;padding:20px 0;
+}
+.pg-btn{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--text2);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.pg-btn.active{background:var(--gold);color:var(--bg0);border-color:var(--gold)}
+.pg-btn:hover:not(.active){border-color:var(--border2);color:var(--text0)}
+
+/* ─── PÁGINA DETALHE ─── */
+.detail-wrap{max-width:900px;margin:0 auto;padding:40px}
+.breadcrumb{
+  display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);
+  margin-bottom:32px;
+}
+.breadcrumb a{color:var(--text2);cursor:pointer;text-decoration:none}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb-sep{color:var(--text4)}
+
+.detail-hero{display:grid;grid-template-columns:200px 1fr;gap:36px;margin-bottom:40px}
+.detail-cover{
+  height:280px;border-radius:12px;display:flex;align-items:flex-end;
+  padding:16px;position:relative;overflow:hidden;flex-shrink:0;
+}
+.detail-cover::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:100px;
+  background:linear-gradient(to top,rgba(0,0,0,.6),transparent);
+}
+.detail-cover-title{
+  font-family:'DM Serif Display',serif;font-size:15px;
+  color:#fff;line-height:1.3;position:relative;z-index:1;
+}
+.detail-meta{display:flex;flex-direction:column;padding-top:4px}
+.detail-category{
+  display:inline-flex;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+  align-items:center;gap:8px;
+}
+.detail-category::before{content:'';width:16px;height:1px;background:var(--gold)}
+.detail-title{font-family:'DM Serif Display',serif;font-size:30px;line-height:1.1;margin-bottom:8px}
+.detail-author{font-size:15px;color:var(--text2);margin-bottom:20px}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.meta-item label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);display:block;margin-bottom:3px}
+.meta-item span{font-size:12px;color:var(--text1)}
+
+.avail-box{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:14px;
+}
+.avail-box-num{font-family:'DM Serif Display',serif;font-size:28px;line-height:1}
+.avail-box-desc{font-size:12px;color:var(--text3);margin-top:2px}
+
+.detail-actions{display:flex;gap:10px;flex-wrap:wrap}
+.da{
+  padding:12px 22px;border-radius:9px;font-size:13px;
+  font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;
+  border:none;transition:all .15s;
+}
+.da-borrow{background:var(--gold);color:var(--bg0)}
+.da-borrow:hover{background:var(--gold2)}
+.da-reserve{background:transparent;border:1px solid var(--border)!important;color:var(--text1)}
+.da-reserve:hover{border-color:var(--border2)!important;color:var(--text0)}
+.da-pdf{background:var(--blue);color:#fff}
+.da-pdf:hover{background:#4B97E8}
+.da-login-hint{font-size:11px;color:var(--text4);margin-top:8px}
+
+.detail-body{border-top:1px solid var(--border);padding-top:32px}
+.detail-section-title{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text4);margin-bottom:12px}
+.sinopse{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:32px}
+.exemplares-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+.exemplar-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+}
+.exemplar-code{font-family:monospace;font-size:11px;color:var(--text1);flex:1}
+.exemplar-loc{font-size:11px;color:var(--text3);flex:2}
+.exemplar-status{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+.es-ok{background:var(--green-dim);color:var(--green)}
+.es-emp{background:var(--blue-dim);color:var(--blue)}
+.es-proc{background:#EF9F2718;color:var(--amber)}
+
+/* ─── LOGIN MODAL ─── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(6px);
+}
+.login-modal{
+  background:var(--bg1);border:1px solid var(--border);border-radius:16px;
+  width:420px;overflow:hidden;position:relative;
+}
+.login-modal-top{
+  padding:28px 28px 0;text-align:center;
+}
+.login-modal-icon{
+  width:52px;height:52px;background:var(--gold);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:24px;color:var(--bg0);
+  margin:0 auto 16px;
+}
+.login-modal-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px}
+.login-modal-sub{font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:24px}
+.login-context{
+  background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 14px;margin-bottom:20px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--text2);text-align:left;
+}
+.login-context-icon{
+  width:32px;height:32px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:14px;color:var(--bg0);
+}
+.login-modal-form{padding:0 28px}
+.lm-field{margin-bottom:14px}
+.lm-field label{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px}
+.lm-field input{
+  width:100%;background:var(--bg0);border:1px solid var(--border);border-radius:8px;
+  padding:11px 14px;font-size:13px;color:var(--text0);font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color .2s;
+}
+.lm-field input:focus{border-color:var(--gold)}
+.lm-field input::placeholder{color:var(--text4)}
+.lm-btn{
+  width:100%;background:var(--gold);color:var(--bg0);border:none;border-radius:9px;
+  padding:13px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;
+  cursor:pointer;letter-spacing:.04em;transition:background .2s;margin-bottom:12px;
+}
+.lm-btn:hover{background:var(--gold2)}
+.lm-sso{
+  width:100%;background:transparent;border:1px solid var(--border);border-radius:9px;
+  padding:11px;font-size:12px;color:var(--text2);font-family:'DM Sans',sans-serif;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;margin-bottom:20px;
+}
+.lm-sso:hover{border-color:var(--border2);color:var(--text0)}
+.lm-dismiss{
+  text-align:center;font-size:12px;color:var(--text4);cursor:pointer;
+  padding-bottom:24px;
+}
+.lm-dismiss:hover{color:var(--text2)}
+.lm-close{
+  position:absolute;top:14px;right:14px;
+  background:var(--bg4);border:none;color:var(--text3);
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;
+}
+
+/* ─── ÁREA PRIVADA ─── */
+.private-layout{display:flex;min-height:calc(100vh - 60px)}
+.private-sidebar{
+  width:220px;flex-shrink:0;background:var(--bg1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:60px;height:calc(100vh - 60px);
+  overflow-y:auto;
+}
+.ps-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text4);padding:16px 20px 6px}
+.ps-item{
+  display:flex;align-items:center;gap:10px;padding:9px 20px;
+  font-size:12px;color:var(--text3);cursor:pointer;border-right:2px solid transparent;
+  transition:all .15s;
+}
+.ps-item:hover{color:var(--text2);background:var(--bg2)}
+.ps-item.active{color:var(--gold);background:#C9A84C08;border-right-color:var(--gold)}
+.ps-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ps-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:9px;border-radius:10px;padding:1px 6px;font-weight:600;
+}
+.ps-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.ps-user-block{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ps-avatar{
+  width:36px;height:36px;border-radius:50%;background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  color:var(--blue);font-weight:500;flex-shrink:0;
+}
+.ps-name{font-size:12px;color:var(--text0);font-weight:500}
+.ps-plan{font-size:10px;color:var(--text4);margin-top:1px}
+.ps-logout{
+  width:100%;background:transparent;border:1px solid var(--border);border-radius:7px;
+  padding:7px;font-size:11px;color:var(--text3);cursor:pointer;font-family:'DM Sans',sans-serif;
+}
+
+.private-main{flex:1;padding:28px 36px;overflow-y:auto}
+.pm-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px}
+.pm-sub{font-size:12px;color:var(--text3);margin-bottom:28px}
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.sum-card-top{width:100%;height:2px;position:absolute;top:0;left:0;border-radius:1px}
+.sum-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:8px}
+.sum-val{font-family:'DM Serif Display',serif;font-size:26px;line-height:1;margin-bottom:4px}
+.sum-sub{font-size:11px;color:var(--text3)}
+
+/* SECTION PANELS */
+.pm-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:20px}
+.pm-panel-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.pm-panel-title{font-size:13px;font-weight:500;color:var(--text0)}
+.pm-panel-badge{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg4);color:var(--text2)}
+
+/* EMPRÉSTIMOS ATIVOS */
+.loan-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+}
+.loan-item:last-child{border-bottom:none}
+.loan-cover{
+  width:40px;height:52px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:9px;color:rgba(255,255,255,.5);
+  text-align:center;padding:4px;
+}
+.loan-info{flex:1}
+.loan-title{font-size:13px;font-weight:500;color:var(--text0);margin-bottom:2px}
+.loan-author{font-size:11px;color:var(--text3);margin-bottom:6px}
+.loan-due{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;padding:2px 8px;border-radius:20px;
+}
+.due-ok{background:var(--green-dim);color:var(--green)}
+.due-soon{background:#EF9F2718;color:var(--amber)}
+.due-late{background:var(--red-dim);color:var(--red)}
+.loan-code{font-family:monospace;font-size:10px;color:var(--text4);margin-top:4px}
+.loan-actions{display:flex;gap:6px;flex-shrink:0}
+.la-btn{
+  background:transparent;border:1px solid var(--border);border-radius:6px;
+  padding:5px 12px;font-size:11px;color:var(--text2);cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
+.la-btn.renew{color:var(--gold);border-color:#C9A84C35}
+
+/* DIGITAL BOOKS */
+.digital-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+}
+.digital-item:last-child{border-bottom:none}
+.digital-cover{
+  width:40px;height:52px;border-radius:6px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:9px;color:rgba(255,255,255,.5);
+  text-align:center;padding:4px;
+}
+.digital-info{flex:1}
+.digital-title{font-size:13px;font-weight:500;color:var(--text0);margin-bottom:2px}
+.digital-author{font-size:11px;color:var(--text3);margin-bottom:4px}
+.digital-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;padding:2px 8px;border-radius:20px;
+  background:var(--blue-dim);color:var(--blue);
+}
+.dl-btn{
+  background:var(--blue);border:none;border-radius:7px;
+  padding:7px 14px;font-size:11px;color:#fff;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap;
+  transition:background .15s;
+}
+.dl-btn:hover{background:#4B97E8}
+
+/* RESERVAS */
+.reserva-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;border-bottom:1px solid var(--border);
+}
+.reserva-item:last-child{border-bottom:none}
+.reserva-pos{
+  width:28px;height:28px;border-radius:50%;background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--text2);font-weight:500;flex-shrink:0;
+}
+.reserva-info{flex:1}
+.reserva-title{font-size:13px;font-weight:500;color:var(--text0)}
+.reserva-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.reserva-cancel{
+  background:transparent;border:1px solid var(--border);border-radius:6px;
+  padding:4px 10px;font-size:10px;color:var(--text3);cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
+
+/* PENDÊNCIAS */
+.pendencia-item{
+  display:flex;align-items:center;gap:12px;
+  background:#E24B4A0D;border-top:1px solid #E24B4A15;
+  padding:12px 20px;
+}
+.pend-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0}
+.pend-info{flex:1;font-size:12px;color:var(--text2)}
+.pend-val{font-size:14px;font-weight:500;color:var(--red)}
+
+/* ─── HISTÓRICO ─── */
+.hist-item{display:flex;align-items:center;gap:12px;padding:11px 20px;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{
+  width:30px;height:30px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:12px;flex-shrink:0;font-weight:600;
+}
+.hi-emp{background:var(--blue-dim);color:var(--blue)}
+.hi-dev{background:var(--green-dim);color:var(--green)}
+.hi-mul{background:var(--red-dim);color:var(--red)}
+.hi-dig{background:#C9A84C18;color:var(--gold)}
+.hist-text{flex:1}
+.hist-title{font-size:12px;color:var(--text0)}
+.hist-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.hist-val{font-size:12px;color:var(--text2)}
+
+/* ─── UTILIDADES ─── */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     HEADER (persiste em todas as views)
+════════════════════════════════════════════ -->
+<header class="pub-header">
+  <a class="pub-logo" onclick="goPage('catalog')">
+    <div class="pub-logo-icon">L</div>
+    LLAM <span>&nbsp;Biblioteca</span>
+  </a>
+  <nav class="pub-nav">
+    <div class="pub-nav-item active" id="nav-catalog" onclick="goPage('catalog')">Catálogo</div>
+    <div class="pub-nav-item" id="nav-private" onclick="requireLogin('minha-biblioteca')">Minha Biblioteca</div>
+  </nav>
+  <div class="pub-header-right" id="header-auth">
+    <button class="btn-login" onclick="openLogin(null,'header')">Criar conta</button>
+    <button class="btn-entrar" onclick="openLogin(null,'header')">Entrar</button>
+  </div>
+  <!-- shown after login -->
+  <div class="user-chip hidden" id="header-user" onclick="goPage('minha-biblioteca')">
+    <div class="user-chip-av">CL</div>
+    <div class="user-chip-name">Carlos Leitor</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     PÁGINA: CATÁLOGO
+════════════════════════════════════════════ -->
+<div class="page active" id="page-catalog">
+
+  <div class="hero-banner">
+    <div class="hero-tag">Instituto LLAM</div>
+    <div class="hero-title">Explore nosso <em>acervo</em></div>
+    <div class="hero-sub">1.847 títulos disponíveis para empréstimo, reserva e compra digital. Encontre seu próximo livro.</div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">1.847</div><div class="hero-stat-lbl">Títulos</div></div>
+      <div><div class="hero-stat-num">4.291</div><div class="hero-stat-lbl">Exemplares</div></div>
+      <div><div class="hero-stat-num">12</div><div class="hero-stat-lbl">Categorias</div></div>
+      <div><div class="hero-stat-num">248</div><div class="hero-stat-lbl">Versões digitais</div></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" placeholder="Buscar por título, autor, ISBN…" oninput="filterBooks(this.value)"/>
+      <span class="search-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </span>
+    </div>
+    <select onchange="filterBooks()">
+      <option>Todas as categorias</option>
+      <option>Tecnologia</option>
+      <option>Literatura Brasileira</option>
+      <option>Ciências</option>
+      <option>Direito</option>
+      <option>Filosofia</option>
+    </select>
+    <select>
+      <option>Popularidade</option>
+      <option>Título A–Z</option>
+      <option>Autor A–Z</option>
+      <option>Mais recentes</option>
+    </select>
+    <label class="filter-check" onclick="toggleCheck(this)">
+      <div class="cb"></div>
+      Apenas disponíveis
+    </label>
+    <div class="results-count">10 de 1.847 títulos</div>
+  </div>
+
+  <div class="catalog-wrap">
+    <div class="book-grid" id="book-grid">
+
+      <!-- Os cards são gerados via JS abaixo -->
+
+    </div>
+    <div class="pagination" style="margin-top:8px">
+      <button class="pg-btn">‹</button>
+      <button class="pg-btn active">1</button>
+      <button class="pg-btn">2</button>
+      <button class="pg-btn">3</button>
+      <span style="color:var(--text4);font-size:13px;padding:0 4px">…</span>
+      <button class="pg-btn">185</button>
+      <button class="pg-btn">›</button>
+      <span style="font-size:11px;color:var(--text3);margin-left:10px">10 por página</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PÁGINA: DETALHE DO TÍTULO
+════════════════════════════════════════════ -->
+<div class="page" id="page-detail">
+  <div class="detail-wrap">
+
+    <div class="breadcrumb">
+      <a onclick="goPage('catalog')">Catálogo</a>
+      <span class="breadcrumb-sep">›</span>
+      <span id="detail-breadcrumb">Dom Casmurro</span>
+    </div>
+
+    <div class="detail-hero">
+      <div class="detail-cover" id="detail-cover">
+        <div class="detail-cover-title" id="detail-cover-title">Dom Casmurro</div>
+      </div>
+      <div class="detail-meta">
+        <div class="detail-category" id="detail-category">Literatura Brasileira</div>
+        <div class="detail-title" id="detail-title">Dom Casmurro</div>
+        <div class="detail-author" id="detail-author">Machado de Assis</div>
+
+        <div class="meta-grid">
+          <div class="meta-item"><label>ISBN</label><span id="detail-isbn">978-85-359-0277-5</span></div>
+          <div class="meta-item"><label>Editora</label><span id="detail-editora">Ática</span></div>
+          <div class="meta-item"><label>Ano</label><span id="detail-ano">1899 (ed. 2023)</span></div>
+          <div class="meta-item"><label>Páginas</label><span id="detail-paginas">256</span></div>
+          <div class="meta-item"><label>Idioma</label><span id="detail-idioma">Português</span></div>
+          <div class="meta-item"><label>Edição</label><span id="detail-edicao">3ª edição</span></div>
+        </div>
+
+        <div class="avail-box">
+          <div>
+            <div class="avail-box-num" id="detail-avail-num" style="color:var(--green)">3</div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--text0)" id="detail-avail-label">exemplares disponíveis</div>
+            <div class="avail-box-desc" id="detail-avail-sub">de 5 totais no acervo</div>
+          </div>
+          <div id="detail-digital-price" style="margin-left:auto;text-align:right;display:none">
+            <div style="font-size:10px;color:var(--text4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">Versão digital</div>
+            <div style="font-size:16px;font-weight:500;color:var(--blue)" id="detail-price">R$ 12,90</div>
+          </div>
+        </div>
+
+        <div class="detail-actions" id="detail-actions">
+          <!-- botões injetados via JS -->
+        </div>
+        <div class="da-login-hint" id="detail-login-hint"></div>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="detail-section-title">Sinopse</div>
+      <div class="sinopse" id="detail-sinopse">
+        Narrado em primeira pessoa por Bentinho, o romance questiona a fidelidade de sua amada Capitu
+        e explora temas como ciúme, memória e subjetividade da percepção humana. Uma das obras mais
+        importantes do Realismo brasileiro, Dom Casmurro permanece atual em suas reflexões sobre
+        confiança e a natureza traiçoeira da memória.
+      </div>
+
+      <div class="detail-section-title">Exemplares no acervo</div>
+      <div class="exemplares-list" id="detail-exemplares"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PÁGINA: MINHA BIBLIOTECA (privada)
+════════════════════════════════════════════ -->
+<div class="page" id="page-minha-biblioteca">
+  <div class="private-layout">
+
+    <!-- Sidebar privada -->
+    <aside class="private-sidebar">
+      <div class="ps-section">Minha conta</div>
+      <div class="ps-item active" id="ps-visao" onclick="setPsTab('visao',this)"><div class="ps-dot"></div>Visão geral</div>
+      <div class="ps-item" id="ps-emprestimos" onclick="setPsTab('emprestimos',this)"><div class="ps-dot"></div>Empréstimos ativos<span class="ps-badge">3</span></div>
+      <div class="ps-item" id="ps-digital" onclick="setPsTab('digital',this)"><div class="ps-dot"></div>Biblioteca digital</div>
+      <div class="ps-item" id="ps-reservas" onclick="setPsTab('reservas',this)"><div class="ps-dot"></div>Reservas<span class="ps-badge" style="background:var(--amber)">1</span></div>
+      <div class="ps-item" id="ps-historico" onclick="setPsTab('historico',this)"><div class="ps-dot"></div>Histórico</div>
+      <div class="ps-item" id="ps-pendencias" onclick="setPsTab('pendencias',this)"><div class="ps-dot"></div>Pendências</div>
+      <div class="ps-section">Descobrir</div>
+      <div class="ps-item" onclick="goPage('catalog')"><div class="ps-dot"></div>Voltar ao catálogo</div>
+
+      <div class="ps-footer">
+        <div class="ps-user-block">
+          <div class="ps-avatar">CL</div>
+          <div>
+            <div class="ps-name">Carlos Leitor</div>
+            <div class="ps-plan">Plano Padrão · 5 livros</div>
+          </div>
+        </div>
+        <button class="ps-logout" onclick="doLogout()">Sair da conta</button>
+      </div>
+    </aside>
+
+    <!-- Conteúdo principal privado -->
+    <main class="private-main">
+
+      <!-- TAB: VISÃO GERAL -->
+      <div id="pst-visao">
+        <div class="pm-title">Minha Biblioteca</div>
+        <div class="pm-sub">Bem-vindo de volta, Carlos! · Instituto LLAM</div>
+
+        <div class="summary-grid">
+          <div class="sum-card">
+            <div class="sum-card-top" style="background:var(--blue)"></div>
+            <div class="sum-label">Emprestados</div>
+            <div class="sum-val" style="color:var(--blue)">3</div>
+            <div class="sum-sub">de 5 disponíveis no plano</div>
+          </div>
+          <div class="sum-card">
+            <div class="sum-card-top" style="background:var(--gold)"></div>
+            <div class="sum-label">Digitais adquiridos</div>
+            <div class="sum-val" style="color:var(--gold)">2</div>
+            <div class="sum-sub">acesso vitalício</div>
+          </div>
+          <div class="sum-card">
+            <div class="sum-card-top" style="background:var(--amber)"></div>
+            <div class="sum-label">Reservas ativas</div>
+            <div class="sum-val" style="color:var(--amber)">1</div>
+            <div class="sum-sub">aguardando disponibilidade</div>
+          </div>
+          <div class="sum-card">
+            <div class="sum-card-top" style="background:var(--green)"></div>
+            <div class="sum-label">Pendências</div>
+            <div class="sum-val" style="color:var(--green)">R$ 0</div>
+            <div class="sum-sub">nenhuma pendência ativa</div>
+          </div>
+        </div>
+
+        <!-- Empréstimos ativos (resumo) -->
+        <div class="pm-panel">
+          <div class="pm-panel-head">
+            <div class="pm-panel-title">Empréstimos ativos</div>
+            <div class="pm-panel-badge">3 livros</div>
+          </div>
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A2A1A,#0F6E56)">Dom C.</div>
+            <div class="loan-info">
+              <div class="loan-title">Dom Casmurro</div>
+              <div class="loan-author">Machado de Assis</div>
+              <span class="loan-due due-ok">Vence em 10/04/2026</span>
+              <div class="loan-code">Exemplar: 978-85-359-0277-002</div>
+            </div>
+            <div class="loan-actions">
+              <button class="la-btn renew">Renovar</button>
+            </div>
+          </div>
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A1A2A,#185FA5)">Clean Code</div>
+            <div class="loan-info">
+              <div class="loan-title">Clean Code</div>
+              <div class="loan-author">Robert C. Martin</div>
+              <span class="loan-due due-soon">Vence em 02/04/2026 · 1 dia</span>
+              <div class="loan-code">Exemplar: 978-01-3235-088-001</div>
+            </div>
+            <div class="loan-actions">
+              <button class="la-btn renew">Renovar</button>
+            </div>
+          </div>
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A1220,#534AB7)">Design P.</div>
+            <div class="loan-info">
+              <div class="loan-title">Design Patterns</div>
+              <div class="loan-author">Gang of Four</div>
+              <span class="loan-due due-late">Venceu em 28/03/2026 · 4 dias de atraso</span>
+              <div class="loan-code">Exemplar: 978-02-0163-483-003</div>
+            </div>
+            <div class="loan-actions">
+              <button class="la-btn" style="color:var(--red);border-color:#E24B4A30">Ver multa</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservas -->
+        <div class="pm-panel">
+          <div class="pm-panel-head">
+            <div class="pm-panel-title">Reservas ativas</div>
+            <div class="pm-panel-badge" style="color:var(--amber);background:#EF9F2715">1 aguardando</div>
+          </div>
+          <div class="reserva-item">
+            <div class="reserva-pos" style="color:var(--amber)">1º</div>
+            <div class="reserva-info">
+              <div class="reserva-title">Java Efetivo</div>
+              <div class="reserva-sub">Joshua Bloch · Reservado em 25/03/2026 · Posição 1 na fila</div>
+            </div>
+            <button class="reserva-cancel">Cancelar</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB: EMPRÉSTIMOS ATIVOS -->
+      <div id="pst-emprestimos" class="hidden">
+        <div class="pm-title">Empréstimos ativos</div>
+        <div class="pm-sub">3 livros em seu poder · Plano Padrão: 2 vagas restantes</div>
+        <div class="pm-panel">
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A2A1A,#0F6E56)">Dom C.</div>
+            <div class="loan-info">
+              <div class="loan-title">Dom Casmurro</div>
+              <div class="loan-author">Machado de Assis</div>
+              <span class="loan-due due-ok">Vence em 10/04/2026 · 9 dias restantes</span>
+              <div class="loan-code">Exemplar 978-85-359-0277-002 · Emprestado em 27/03/2026</div>
+            </div>
+            <div class="loan-actions"><button class="la-btn renew">Renovar</button></div>
+          </div>
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A1A2A,#185FA5)">Clean Code</div>
+            <div class="loan-info">
+              <div class="loan-title">Clean Code</div>
+              <div class="loan-author">Robert C. Martin</div>
+              <span class="loan-due due-soon">Vence amanhã · 02/04/2026</span>
+              <div class="loan-code">Exemplar 978-01-3235-088-001 · Emprestado em 19/03/2026</div>
+            </div>
+            <div class="loan-actions"><button class="la-btn renew">Renovar</button></div>
+          </div>
+          <div class="loan-item">
+            <div class="loan-cover" style="background:linear-gradient(135deg,#1A1220,#534AB7)">Design P.</div>
+            <div class="loan-info">
+              <div class="loan-title">Design Patterns</div>
+              <div class="loan-author">Gang of Four</div>
+              <span class="loan-due due-late">Venceu 28/03/2026 · 4 dias de atraso · Multa R$ 4,00</span>
+              <div class="loan-code">Exemplar 978-02-0163-483-003 · Emprestado em 14/03/2026</div>
+            </div>
+            <div class="loan-actions">
+              <button class="la-btn" style="color:var(--red);border-color:#E24B4A30">Ver multa</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: BIBLIOTECA DIGITAL -->
+      <div id="pst-digital" class="hidden">
+        <div class="pm-title">Biblioteca Digital</div>
+        <div class="pm-sub">2 títulos adquiridos · Acesso vitalício · Download ilimitado</div>
+        <div class="pm-panel">
+          <div class="digital-item">
+            <div class="digital-cover" style="background:linear-gradient(135deg,#1A1A2A,#185FA5)">Clean Code</div>
+            <div class="digital-info">
+              <div class="digital-title">Clean Code</div>
+              <div class="digital-author">Robert C. Martin</div>
+              <span class="digital-badge">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                PDF · Acesso vitalício
+              </span>
+            </div>
+            <div style="text-align:right;font-size:11px;color:var(--text4);margin-right:12px">Adquirido em 15/02/2026</div>
+            <button class="dl-btn">⬇ Baixar PDF</button>
+          </div>
+          <div class="digital-item">
+            <div class="digital-cover" style="background:linear-gradient(135deg,#2A1A10,#993C1D)">Alquimista</div>
+            <div class="digital-info">
+              <div class="digital-title">O Alquimista</div>
+              <div class="digital-author">Paulo Coelho</div>
+              <span class="digital-badge">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2 5l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                PDF · Acesso vitalício
+              </span>
+            </div>
+            <div style="text-align:right;font-size:11px;color:var(--text4);margin-right:12px">Adquirido em 02/01/2026</div>
+            <button class="dl-btn">⬇ Baixar PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RESERVAS -->
+      <div id="pst-reservas" class="hidden">
+        <div class="pm-title">Reservas ativas</div>
+        <div class="pm-sub">1 reserva aguardando disponibilidade</div>
+        <div class="pm-panel">
+          <div class="reserva-item">
+            <div class="reserva-pos" style="color:var(--amber);background:#EF9F2718;border-radius:50%">1º</div>
+            <div class="reserva-info">
+              <div class="reserva-title">Java Efetivo</div>
+              <div class="reserva-sub">Joshua Bloch · Reservado em 25/03/2026 · Você é o 1º na fila de 5 · Prazo de retirada: 3 dias após devolução</div>
+            </div>
+            <button class="reserva-cancel">Cancelar reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: HISTÓRICO -->
+      <div id="pst-historico" class="hidden">
+        <div class="pm-title">Histórico de atividades</div>
+        <div class="pm-sub">Todas as suas movimentações na biblioteca</div>
+        <div class="pm-panel">
+          <div class="hist-item"><div class="hist-icon hi-emp">E</div><div class="hist-text"><div class="hist-title">Empréstimo — Dom Casmurro</div><div class="hist-sub">27/03/2026 · Exemplar 978-85-359-0277-002</div></div><div class="hist-val">Ativo</div></div>
+          <div class="hist-item"><div class="hist-icon hi-emp">E</div><div class="hist-text"><div class="hist-title">Empréstimo — Clean Code</div><div class="hist-sub">19/03/2026 · Exemplar 978-01-3235-088-001</div></div><div class="hist-val">Ativo</div></div>
+          <div class="hist-item"><div class="hist-icon hi-dig">D</div><div class="hist-text"><div class="hist-title">Compra digital — Clean Code PDF</div><div class="hist-sub">15/02/2026 · R$ 18,90</div></div><div class="hist-val" style="color:var(--gold)">R$ 18,90</div></div>
+          <div class="hist-item"><div class="hist-icon hi-dev">✓</div><div class="hist-text"><div class="hist-title">Devolução — O Alquimista</div><div class="hist-sub">10/02/2026 · No prazo</div></div><div class="hist-val" style="color:var(--green)">No prazo</div></div>
+          <div class="hist-item"><div class="hist-icon hi-emp">E</div><div class="hist-text"><div class="hist-title">Empréstimo — O Alquimista</div><div class="hist-sub">27/01/2026 · Exemplar 978-85-325-0101-004</div></div><div class="hist-val" style="color:var(--green)">Devolvido</div></div>
+          <div class="hist-item"><div class="hist-icon hi-mul">!</div><div class="hist-text"><div class="hist-title">Multa paga — Refactoring</div><div class="hist-sub">12/01/2026 · 3 dias de atraso</div></div><div class="hist-val" style="color:var(--red)">R$ 3,00</div></div>
+          <div class="hist-item"><div class="hist-icon hi-dig">D</div><div class="hist-text"><div class="hist-title">Compra digital — O Alquimista PDF</div><div class="hist-sub">02/01/2026 · R$ 12,90</div></div><div class="hist-val" style="color:var(--gold)">R$ 12,90</div></div>
+        </div>
+      </div>
+
+      <!-- TAB: PENDÊNCIAS -->
+      <div id="pst-pendencias" class="hidden">
+        <div class="pm-title">Pendências financeiras</div>
+        <div class="pm-sub">Nenhuma pendência ativa</div>
+        <div class="pm-panel">
+          <div style="padding:36px;text-align:center;color:var(--text4)">
+            <div style="font-size:32px;margin-bottom:12px">✓</div>
+            <div style="font-size:14px;color:var(--green)">Nenhuma pendência</div>
+            <div style="font-size:12px;color:var(--text4);margin-top:6px">Sua conta está em dia.</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL DE LOGIN
+════════════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="login-modal-wrap" onclick="handleBackdropClick(event)">
+  <div class="login-modal" onclick="event.stopPropagation()">
+    <button class="lm-close" onclick="closeLogin()">✕</button>
+    <div class="login-modal-top">
+      <div class="login-modal-icon">L</div>
+      <div class="login-modal-title" id="lm-title">Entre na sua conta</div>
+      <div class="login-modal-sub" id="lm-sub">Para realizar esta ação você precisa estar autenticado.</div>
+      <div class="login-context hidden" id="lm-context">
+        <div class="login-context-icon" id="lm-ctx-icon" style="background:var(--gold)">L</div>
+        <div><div style="font-size:12px;font-weight:500;color:var(--text0)" id="lm-ctx-title"></div><div style="font-size:11px;color:var(--text3);margin-top:2px" id="lm-ctx-action"></div></div>
+      </div>
+    </div>
+    <div class="login-modal-form">
+      <div class="lm-field">
+        <label>Login ou e-mail</label>
+        <input type="text" placeholder="seu.login@instituicao.edu.br"/>
+      </div>
+      <div class="lm-field">
+        <label>Senha</label>
+        <input type="password" placeholder="••••••••••"/>
+      </div>
+      <button class="lm-btn" onclick="doLogin()">Entrar na plataforma</button>
+      <button class="lm-sso">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 3.5v7M3.5 7h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Entrar via SSO institucional
+      </button>
+      <div class="lm-dismiss" onclick="closeLogin()">Continuar sem login — só navegação</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+/* ── DADOS ── */
+const BOOKS = [
+  {
+    id:1,title:'Dom Casmurro',author:'Machado de Assis',category:'Literatura Brasileira',
+    isbn:'978-85-359-0277-5',editora:'Ática',ano:'1899 (ed. 2023)',paginas:'256',
+    idioma:'Português',edicao:'3ª edição',
+    cover:'linear-gradient(135deg,#1A2A1A,#0F6E56)',
+    avail:3,total:5,digital:true,price:'R$ 12,90',
+    sinopse:'Narrado em primeira pessoa por Bentinho, o romance questiona a fidelidade de sua amada Capitu e explora temas como ciúme, memória e subjetividade da percepção humana. Uma das obras mais importantes do Realismo brasileiro, Dom Casmurro permanece atual em suas reflexões sobre confiança e a natureza traiçoeira da memória.',
+    exemplares:[
+      {code:'978-85-359-0277-001',loc:'Seção A · Corredor 2 · Prateleira 4',status:'ok',label:'Disponível'},
+      {code:'978-85-359-0277-002',loc:'Seção A · Corredor 2 · Prateleira 4',status:'emp',label:'Emprestado'},
+      {code:'978-85-359-0277-003',loc:'Seção A · Corredor 2 · Prateleira 5',status:'ok',label:'Disponível'},
+      {code:'978-85-359-0277-004',loc:'Seção A · Corredor 2 · Prateleira 5',status:'ok',label:'Disponível'},
+      {code:'978-85-359-0277-005',loc:'Seção A · Corredor 3 · Prateleira 1',status:'proc',label:'Em processamento'},
+    ]
+  },
+  {
+    id:2,title:'Clean Code',author:'Robert C. Martin',category:'Tecnologia',
+    isbn:'978-01-3235-088-0',editora:'Prentice Hall',ano:'2008',paginas:'431',
+    idioma:'Inglês',edicao:'1ª edição',
+    cover:'linear-gradient(135deg,#1A1A2A,#185FA5)',
+    avail:1,total:3,digital:true,price:'R$ 18,90',
+    sinopse:'Um guia definitivo sobre boas práticas de programação. Martin apresenta princípios, padrões e técnicas para escrever código limpo, legível e de fácil manutenção. Leitura obrigatória para todo desenvolvedor que deseja elevar a qualidade de seu trabalho.',
+    exemplares:[
+      {code:'978-01-3235-088-001',loc:'Seção B · Corredor 1 · Prateleira 2',status:'emp',label:'Emprestado'},
+      {code:'978-01-3235-088-002',loc:'Seção B · Corredor 1 · Prateleira 2',status:'emp',label:'Emprestado'},
+      {code:'978-01-3235-088-003',loc:'Seção B · Corredor 1 · Prateleira 3',status:'ok',label:'Disponível'},
+    ]
+  },
+  {
+    id:3,title:'O Alquimista',author:'Paulo Coelho',category:'Literatura Brasileira',
+    isbn:'978-85-325-0101-8',editora:'HarperCollins',ano:'1988 (ed. 2022)',paginas:'197',
+    idioma:'Português',edicao:'especial',
+    cover:'linear-gradient(135deg,#2A1A10,#993C1D)',
+    avail:0,total:6,digital:true,price:'R$ 12,90',
+    sinopse:'A história de Santiago, um jovem pastor andaluz que sonha em descobrir um tesouro no Egito. Uma fábula filosófica sobre seguir os próprios sonhos e ouvir a linguagem dos presságios. Um dos livros mais vendidos da história.',
+    exemplares:[
+      {code:'978-85-325-0101-001',loc:'Seção A · Corredor 5 · Prateleira 1',status:'emp',label:'Emprestado'},
+      {code:'978-85-325-0101-002',loc:'Seção A · Corredor 5 · Prateleira 1',status:'emp',label:'Emprestado'},
+      {code:'978-85-325-0101-003',loc:'Seção A · Corredor 5 · Prateleira 2',status:'emp',label:'Emprestado'},
+      {code:'978-85-325-0101-004',loc:'Seção A · Corredor 5 · Prateleira 2',status:'emp',label:'Emprestado'},
+      {code:'978-85-325-0101-005',loc:'Seção A · Corredor 5 · Prateleira 3',status:'emp',label:'Emprestado'},
+      {code:'978-85-325-0101-006',loc:'Seção A · Corredor 5 · Prateleira 3',status:'emp',label:'Emprestado'},
+    ]
+  },
+  {
+    id:4,title:'Design Patterns',author:'Gang of Four',category:'Tecnologia',
+    isbn:'978-02-0163-483-7',editora:'Addison-Wesley',ano:'1994',paginas:'395',
+    idioma:'Inglês',edicao:'1ª edição',
+    cover:'linear-gradient(135deg,#1A1220,#534AB7)',
+    avail:2,total:4,digital:false,price:null,
+    sinopse:'O livro clássico sobre padrões de projeto de software. Os autores catalogam 23 padrões recorrentes de design orientado a objetos, fornecendo soluções elegantes para problemas comuns de arquitetura de software.',
+    exemplares:[
+      {code:'978-02-0163-483-001',loc:'Seção B · Corredor 2 · Prateleira 1',status:'ok',label:'Disponível'},
+      {code:'978-02-0163-483-002',loc:'Seção B · Corredor 2 · Prateleira 1',status:'emp',label:'Emprestado'},
+      {code:'978-02-0163-483-003',loc:'Seção B · Corredor 2 · Prateleira 2',status:'emp',label:'Emprestado'},
+      {code:'978-02-0163-483-004',loc:'Seção B · Corredor 2 · Prateleira 2',status:'ok',label:'Disponível'},
+    ]
+  },
+  {
+    id:5,title:'Java Efetivo',author:'Joshua Bloch',category:'Tecnologia',
+    isbn:'978-01-3468-599-1',editora:'Addison-Wesley',ano:'2018',paginas:'412',
+    idioma:'Inglês',edicao:'3ª edição',
+    cover:'linear-gradient(135deg,#1A1020,#72243E)',
+    avail:0,total:2,digital:true,price:'R$ 22,90',
+    sinopse:'A bíblia do desenvolvedor Java. Bloch apresenta 90 itens com boas práticas e armadilhas a evitar, cobrindo desde criação de objetos até programação concorrente. Um clássico essencial para qualquer programador Java sério.',
+    exemplares:[
+      {code:'978-01-3468-599-001',loc:'Seção B · Corredor 3 · Prateleira 4',status:'emp',label:'Emprestado'},
+      {code:'978-01-3468-599-002',loc:'Seção B · Corredor 3 · Prateleira 4',status:'emp',label:'Emprestado'},
+    ]
+  },
+  {
+    id:6,title:'Capitães da Areia',author:'Jorge Amado',category:'Literatura Brasileira',
+    isbn:'978-85-350-0481-2',editora:'Companhia das Letras',ano:'1937 (ed. 2021)',paginas:'272',
+    idioma:'Português',edicao:'nova edição',
+    cover:'linear-gradient(135deg,#1A1A14,#3B6D11)',
+    avail:5,total:5,digital:false,price:null,
+    sinopse:'Romance social que narra a vida de um grupo de crianças e adolescentes abandonados nas ruas de Salvador. Uma das obras mais importantes de Jorge Amado, que retrata com sensibilidade e denúncia a miséria e a marginalização no Brasil.',
+    exemplares:[
+      {code:'978-85-350-0481-001',loc:'Seção A · Corredor 4 · Prateleira 2',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0481-002',loc:'Seção A · Corredor 4 · Prateleira 2',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0481-003',loc:'Seção A · Corredor 4 · Prateleira 3',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0481-004',loc:'Seção A · Corredor 4 · Prateleira 3',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0481-005',loc:'Seção A · Corredor 4 · Prateleira 4',status:'ok',label:'Disponível'},
+    ]
+  },
+  {
+    id:7,title:'The Pragmatic Programmer',author:'Hunt & Thomas',category:'Tecnologia',
+    isbn:'978-01-3595-705-9',editora:'Addison-Wesley',ano:'2019',paginas:'352',
+    idioma:'Inglês',edicao:'20th anniversary',
+    cover:'linear-gradient(135deg,#1A1010,#A32D2D)',
+    avail:0,total:1,digital:true,price:'R$ 24,90',
+    sinopse:'Um guia essencial para o desenvolvimento de software profissional. Os autores compartilham décadas de experiência em forma de dicas práticas, filosofias e abordagens para se tornar um programador mais eficaz e adaptável.',
+    exemplares:[
+      {code:'978-01-3595-705-001',loc:'Seção B · Corredor 4 · Prateleira 1',status:'emp',label:'Emprestado'},
+    ]
+  },
+  {
+    id:8,title:'Refactoring',author:'Martin Fowler',category:'Tecnologia',
+    isbn:'978-01-3447-878-0',editora:'Addison-Wesley',ano:'2018',paginas:'448',
+    idioma:'Inglês',edicao:'2ª edição',
+    cover:'linear-gradient(135deg,#10181A,#085041)',
+    avail:0,total:2,digital:false,price:null,
+    sinopse:'A obra de referência sobre refatoração de código. Fowler apresenta um catálogo de técnicas para melhorar a estrutura interna do código sem alterar seu comportamento externo, tornando-o mais limpo e fácil de manter.',
+    exemplares:[
+      {code:'978-01-3447-878-001',loc:'Seção B · Corredor 4 · Prateleira 3',status:'emp',label:'Emprestado'},
+      {code:'978-01-3447-878-002',loc:'Seção B · Corredor 4 · Prateleira 3',status:'emp',label:'Emprestado'},
+    ]
+  },
+  {
+    id:9,title:'Memórias Póstumas',author:'Machado de Assis',category:'Literatura Brasileira',
+    isbn:'978-85-359-0221-8',editora:'Ática',ano:'1881 (ed. 2023)',paginas:'208',
+    idioma:'Português',edicao:'2ª edição',
+    cover:'linear-gradient(135deg,#14141A,#2A3444)',
+    avail:2,total:3,digital:false,price:null,
+    sinopse:'Narradas pelo próprio defunto Brás Cubas, estas memórias inauguram o Realismo no Brasil. Com ironia e pessimismo característicos, Machado de Assis cria um dos mais originais narradores da literatura mundial.',
+    exemplares:[
+      {code:'978-85-359-0221-001',loc:'Seção A · Corredor 2 · Prateleira 6',status:'ok',label:'Disponível'},
+      {code:'978-85-359-0221-002',loc:'Seção A · Corredor 2 · Prateleira 6',status:'emp',label:'Emprestado'},
+      {code:'978-85-359-0221-003',loc:'Seção A · Corredor 2 · Prateleira 7',status:'ok',label:'Disponível'},
+    ]
+  },
+  {
+    id:10,title:'A Moreninha',author:'Joaquim Macedo',category:'Literatura Brasileira',
+    isbn:'978-85-350-0062-3',editora:'Ática',ano:'1844 (ed. 2020)',paginas:'192',
+    idioma:'Português',edicao:'1ª edição',
+    cover:'linear-gradient(135deg,#1A1610,#854F0B)',
+    avail:4,total:4,digital:false,price:null,
+    sinopse:'Considerado o primeiro romance brasileiro, A Moreninha narra o romance de Augusto com Carolina numa ilha próxima ao Rio de Janeiro. Uma obra leve e sentimental que inaugurou a ficção romanesca no Brasil.',
+    exemplares:[
+      {code:'978-85-350-0062-001',loc:'Seção A · Corredor 6 · Prateleira 1',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0062-002',loc:'Seção A · Corredor 6 · Prateleira 1',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0062-003',loc:'Seção A · Corredor 6 · Prateleira 2',status:'ok',label:'Disponível'},
+      {code:'978-85-350-0062-004',loc:'Seção A · Corredor 6 · Prateleira 2',status:'ok',label:'Disponível'},
+    ]
+  },
+];
+
+/* ── STATE ── */
+let isLoggedIn = false;
+let pendingAction = null; // {action, bookId} after login
+
+/* ── RENDER GRID ── */
+function renderGrid(books){
+  const grid = document.getElementById('book-grid');
+  grid.innerHTML = books.map(b => {
+    const availHtml = b.avail > 0
+      ? `<span class="avail-pill avail-ok">${b.avail} disp.</span>`
+      : b.digital
+        ? `<span class="avail-pill avail-digital">Só PDF</span>`
+        : `<span class="avail-pill avail-none">Indispon.</span>`;
+
+    const btns = b.avail > 0
+      ? `<button class="ba ba-borrow" onclick="event.stopPropagation();actionGate(${b.id},'borrow')">Emprestar</button>`
+        + (b.digital ? `<button class="ba ba-pdf" onclick="event.stopPropagation();actionGate(${b.id},'pdf')">PDF</button>` : '')
+      : b.digital
+        ? `<button class="ba ba-pdf" onclick="event.stopPropagation();actionGate(${b.id},'pdf')">Comprar PDF</button>`
+        : `<button class="ba ba-reserve" onclick="event.stopPropagation();actionGate(${b.id},'reserve')">Reservar</button>`;
+
+    return `
+    <div class="book-card" onclick="openDetail(${b.id})">
+      <div class="book-cover" style="background:${b.cover}">
+        ${availHtml}
+        <div class="book-cover-title">${b.title}</div>
+      </div>
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        <div class="book-author">${b.author}</div>
+        <div class="book-category">${b.category}</div>
+        <div class="book-actions">${btns}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterBooks(query){
+  // visual only for prototype
+}
+function toggleCheck(el){
+  el.querySelector('.cb').classList.toggle('on');
+}
+
+/* ── DETAIL PAGE ── */
+function openDetail(id){
+  const b = BOOKS.find(x=>x.id===id);
+  if(!b) return;
+
+  // fill fields
+  document.getElementById('detail-breadcrumb').textContent = b.title;
+  document.getElementById('detail-cover').style.background = b.cover;
+  document.getElementById('detail-cover-title').textContent = b.title;
+  document.getElementById('detail-category').lastChild.textContent = ' ' + b.category;
+  document.getElementById('detail-title').textContent = b.title;
+  document.getElementById('detail-author').textContent = b.author;
+  document.getElementById('detail-isbn').textContent = b.isbn;
+  document.getElementById('detail-editora').textContent = b.editora;
+  document.getElementById('detail-ano').textContent = b.ano;
+  document.getElementById('detail-paginas').textContent = b.paginas + ' páginas';
+  document.getElementById('detail-idioma').textContent = b.idioma;
+  document.getElementById('detail-edicao').textContent = b.edicao;
+  document.getElementById('detail-sinopse').textContent = b.sinopse;
+
+  // availability
+  const an = document.getElementById('detail-avail-num');
+  const al = document.getElementById('detail-avail-label');
+  const as = document.getElementById('detail-avail-sub');
+  if(b.avail > 0){
+    an.textContent = b.avail; an.style.color = 'var(--green)';
+    al.textContent = 'exemplares disponíveis';
+    as.textContent = `de ${b.total} totais no acervo`;
+  } else {
+    an.textContent = '0'; an.style.color = 'var(--red)';
+    al.textContent = 'exemplares disponíveis';
+    as.textContent = `todos os ${b.total} exemplares estão emprestados`;
+  }
+
+  // digital price
+  const dp = document.getElementById('detail-digital-price');
+  if(b.digital){ dp.style.display='block'; document.getElementById('detail-price').textContent = b.price; }
+  else { dp.style.display='none'; }
+
+  // actions
+  buildDetailActions(b);
+
+  // exemplares
+  const el = document.getElementById('detail-exemplares');
+  el.innerHTML = b.exemplares.map(e=>`
+    <div class="exemplar-row">
+      <div class="exemplar-code">${e.code}</div>
+      <div class="exemplar-loc">${e.loc}</div>
+      <span class="exemplar-status ${e.status==='ok'?'es-ok':e.status==='emp'?'es-emp':'es-proc'}">${e.label}</span>
+    </div>`).join('');
+
+  // hint
+  const hint = document.getElementById('detail-login-hint');
+  hint.textContent = isLoggedIn ? '' : 'Faça login para emprestar, reservar ou comprar.';
+
+  goPage('detail');
+  window.scrollTo(0,0);
+}
+
+function buildDetailActions(b){
+  const container = document.getElementById('detail-actions');
+  let html = '';
+  if(b.avail > 0){
+    html += `<button class="da da-borrow" onclick="actionGate(${b.id},'borrow')">Emprestar este livro</button>`;
+  } else {
+    html += `<button class="da da-reserve" style="border:1px solid var(--border)" onclick="actionGate(${b.id},'reserve')">Entrar na fila de reserva</button>`;
+  }
+  if(b.digital){
+    html += `<button class="da da-pdf" onclick="actionGate(${b.id},'pdf')">Comprar versão PDF · ${b.price}</button>`;
+  }
+  container.innerHTML = html;
+}
+
+/* ── ACTION GATE ── */
+const ACTION_LABELS = {
+  borrow:'Emprestar livro',
+  reserve:'Reservar — entrar na fila',
+  pdf:'Comprar versão digital (PDF)',
+};
+
+function actionGate(bookId, action){
+  if(isLoggedIn){
+    showActionFeedback(bookId, action);
+    return;
+  }
+  pendingAction = {bookId, action};
+  const b = BOOKS.find(x=>x.id===bookId);
+  openLogin(b, action);
+}
+
+function showActionFeedback(bookId, action){
+  const b = BOOKS.find(x=>x.id===bookId);
+  const msgs = {
+    borrow:`Empréstimo de "${b.title}" iniciado com sucesso!`,
+    reserve:`Você entrou na fila de reserva para "${b.title}".`,
+    pdf:`Redirecionando para o checkout de "${b.title}" (PDF)…`,
+  };
+  alert(msgs[action]);
+}
+
+/* ── LOGIN MODAL ── */
+function openLogin(book, action){
+  const ctx = document.getElementById('lm-context');
+  const ctxTitle = document.getElementById('lm-ctx-title');
+  const ctxAction = document.getElementById('lm-ctx-action');
+  const ctxIcon = document.getElementById('lm-ctx-icon');
+  const sub = document.getElementById('lm-sub');
+
+  if(book){
+    ctx.classList.remove('hidden');
+    ctxIcon.style.background = book.cover;
+    ctxTitle.textContent = book.title;
+    ctxAction.textContent = ACTION_LABELS[action] || '';
+    sub.textContent = 'Para continuar você precisa estar autenticado.';
+  } else {
+    ctx.classList.add('hidden');
+    sub.textContent = 'Acesse sua biblioteca pessoal, histórico e gerencie empréstimos.';
+  }
+  document.getElementById('login-modal-wrap').classList.remove('hidden');
+}
+
+function closeLogin(){
+  document.getElementById('login-modal-wrap').classList.add('hidden');
+  pendingAction = null;
+}
+
+function handleBackdropClick(e){
+  if(e.target===document.getElementById('login-modal-wrap')) closeLogin();
+}
+
+function doLogin(){
+  isLoggedIn = true;
+  document.getElementById('login-modal-wrap').classList.add('hidden');
+
+  // update header
+  document.getElementById('header-auth').classList.add('hidden');
+  document.getElementById('header-user').classList.remove('hidden');
+
+  if(pendingAction){
+    const pa = pendingAction;
+    pendingAction = null;
+    showActionFeedback(pa.bookId, pa.action);
+  } else {
+    goPage('minha-biblioteca');
+  }
+}
+
+function doLogout(){
+  isLoggedIn = false;
+  document.getElementById('header-auth').classList.remove('hidden');
+  document.getElementById('header-user').classList.add('hidden');
+  goPage('catalog');
+}
+
+/* ── PAGE ROUTING ── */
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+
+  // nav highlight
+  document.querySelectorAll('.pub-nav-item').forEach(n=>n.classList.remove('active'));
+  if(id==='catalog'||id==='detail') document.getElementById('nav-catalog').classList.add('active');
+  if(id==='minha-biblioteca') document.getElementById('nav-private').classList.add('active');
+
+  window.scrollTo(0,0);
+}
+
+function requireLogin(page){
+  if(isLoggedIn){ goPage(page); }
+  else { openLogin(null,'area'); }
+}
+
+/* ── PRIVATE TABS ── */
+function setPsTab(id, el){
+  ['visao','emprestimos','digital','reservas','historico','pendencias'].forEach(t=>{
+    document.getElementById('pst-'+t).classList.add('hidden');
+    document.getElementById('ps-'+t)?.classList.remove('active');
+  });
+  document.getElementById('pst-'+id).classList.remove('hidden');
+  el.classList.add('active');
+}
+
+/* ── INIT ── */
+renderGrid(BOOKS);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LLAM Biblioteca — Gestão de Leitores</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0C0F14;--bg1:#080B10;--bg2:#0F1319;--bg3:#141920;--bg4:#1A2030;
+  --border:#1E2530;--border2:#2A3444;
+  --text0:#E8E4DC;--text1:#B0A99A;--text2:#7A8494;--text3:#4A5568;--text4:#2A3444;
+  --gold:#C9A84C;--blue:#378ADD;--green:#1D9E75;--red:#E24B4A;--amber:#EF9F27;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg0);color:var(--text0);display:flex;height:100vh;overflow:hidden}
+
+.sidebar{width:200px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo{width:28px;height:28px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;color:var(--bg0);font-weight:700}
+.sb-name{font-family:'DM Serif Display',serif;font-size:14px}
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto}
+.sb-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text4);padding:12px 20px 6px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 20px;font-size:12px;color:var(--text3);cursor:pointer;border-right:2px solid transparent}
+.sb-item.active{color:var(--gold);background:#C9A84C08;border-right-color:var(--gold)}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.sb-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.sb-tenant{font-size:10px;color:var(--text4);margin-bottom:10px}
+.sb-user{display:flex;align-items:center;gap:8px}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold);font-weight:500}
+.sb-uname{font-size:11px;color:var(--text2)}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.page-title{font-family:'DM Serif Display',serif;font-size:22px}
+.page-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+.toolbar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.search-wrap{position:relative;flex:1;max-width:320px}
+.search-wrap input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 12px;font-size:12px;color:var(--text0);font-family:'DM Sans',sans-serif;outline:none}
+.search-wrap input::placeholder{color:var(--text4)}
+.search-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text3)}
+select{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);font-family:'DM Sans',sans-serif;outline:none}
+.btn-ghost{background:transparent;border:1px solid var(--border);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-gold{background:var(--gold);border:none;border-radius:7px;padding:7px 16px;font-size:12px;color:var(--bg0);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;margin-left:auto}
+
+.table-wrap{flex:1;overflow-y:auto;padding:0 24px 20px}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+thead th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--bg2)}
+td{padding:11px 12px;font-size:12px;color:var(--text1);vertical-align:middle}
+td.name-cell{color:var(--text0);font-weight:500}
+
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.badge-ativo{background:#1D9E7520;color:var(--green)}
+.badge-suspenso{background:#EF9F2720;color:var(--amber)}
+.badge-bloqueado{background:#E24B4A20;color:var(--red)}
+.badge-plan{background:var(--bg4);color:var(--text2)}
+.badge-plan.gold{background:#C9A84C20;color:var(--gold)}
+
+.row-actions{display:flex;gap:6px}
+.row-btn{background:transparent;border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.row-btn.primary{color:var(--gold);border-color:#C9A84C40}
+.row-btn.danger{color:var(--red);border-color:#E24B4A30}
+
+/* DRAWER */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:520px;background:var(--bg2);border-left:1px solid var(--border);z-index:100;display:flex;flex-direction:column;overflow:hidden}
+.drawer-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.drawer-head h2{font-family:'DM Serif Display',serif;font-size:20px}
+.drawer-close{background:var(--bg4);border:none;color:var(--text2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px}
+.drawer-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.dtab{padding:10px 18px;font-size:12px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent}
+.dtab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.drawer-body{flex:1;overflow-y:auto;padding:20px 24px}
+
+.leitor-profile{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--blue);font-weight:500}
+.profile-name{font-size:16px;font-weight:500;color:var(--text0);margin-bottom:4px}
+.profile-sub{font-size:12px;color:var(--text3)}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.info-item label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);display:block;margin-bottom:3px}
+.info-item span{font-size:12px;color:var(--text1)}
+
+.section-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text4);margin-bottom:10px;padding-top:14px;border-top:1px solid var(--border)}
+
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.hist-icon.emp{background:#378ADD18;color:var(--blue)}
+.hist-icon.dev{background:#1D9E7518;color:var(--green)}
+.hist-icon.mul{background:#E24B4A18;color:var(--red)}
+.hist-text{flex:1}
+.hist-title{font-size:12px;color:var(--text0)}
+.hist-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.hist-val{font-size:11px;color:var(--text2)}
+
+.multa-pend{background:#E24B4A0D;border:1px solid #E24B4A20;border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.multa-info{flex:1}
+.multa-desc{font-size:12px;color:var(--text0)}
+.multa-date{font-size:10px;color:var(--text3);margin-top:2px}
+.multa-val{font-size:13px;font-weight:500;color:var(--red);margin-right:8px}
+.btn-isentar{background:transparent;border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:10px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+
+.drawer-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.df-btn{flex:1;padding:9px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;border:1px solid var(--border);color:var(--text2);background:transparent}
+.df-btn.primary{background:var(--gold);color:var(--bg0);border-color:var(--gold);font-weight:500}
+.df-btn.danger{color:var(--red);border-color:#E24B4A30}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sb-brand"><div class="sb-logo">L</div><div class="sb-name">LLAM</div></div>
+  <div class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <div class="sb-item"><div class="sb-dot"></div>Dashboard</div>
+    <div class="sb-item"><div class="sb-dot"></div>Catálogo</div>
+    <div class="sb-section">Gestão</div>
+    <div class="sb-item"><div class="sb-dot"></div>Acervo</div>
+    <div class="sb-item active"><div class="sb-dot"></div>Leitores</div>
+    <div class="sb-item"><div class="sb-dot"></div>Empréstimos</div>
+    <div class="sb-item"><div class="sb-dot"></div>Multas</div>
+    <div class="sb-item"><div class="sb-dot"></div>Relatórios</div>
+    <div class="sb-section">Config</div>
+    <div class="sb-item"><div class="sb-dot"></div>Planos</div>
+    <div class="sb-item"><div class="sb-dot"></div>Configurações</div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-tenant">Instituto LLAM · Admin</div>
+    <div class="sb-user"><div class="sb-avatar">MB</div><div class="sb-uname">Maria Bibliotecária</div></div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Gestão de Leitores</div>
+      <div class="page-sub">2.103 leitores cadastrados · 28 com pendências</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="text" placeholder="Nome, login ou e-mail…"/>
+      <span class="search-icon"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.2"/><path d="M9 9L11.5 11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+    </div>
+    <select><option>Todos os status</option><option>Ativo</option><option>Suspenso</option><option>Bloqueado</option></select>
+    <select><option>Todos os planos</option><option>Gratuito</option><option>Padrão</option><option>Premium</option></select>
+    <select><option>Todos os vínculos</option><option>Aluno</option><option>Professor</option><option>Funcionário</option><option>Externo</option></select>
+    <button class="btn-ghost">⬆ Importar CSV</button>
+    <button class="btn-gold" onclick="openDrawer()">+ Novo Leitor</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Login</th>
+          <th>E-mail</th>
+          <th>Vínculo</th>
+          <th>Plano</th>
+          <th>Emprestados</th>
+          <th>Pendências</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="openDrawer()">
+          <td class="name-cell">João da Silva Santos</td>
+          <td style="font-family:monospace;font-size:11px">joao.santos</td>
+          <td>joao.santos@usp.br</td>
+          <td>Aluno</td>
+          <td><span class="badge badge-plan">Padrão</span></td>
+          <td style="color:var(--blue)">3</td>
+          <td style="color:var(--text3)">R$ 0</td>
+          <td><span class="badge badge-ativo">Ativo</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button><button class="row-btn">Reset</button></div></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Ana Paula Santos</td>
+          <td style="font-family:monospace;font-size:11px">ana.paula</td>
+          <td>ana.paula@usp.br</td>
+          <td>Professora</td>
+          <td><span class="badge badge-plan gold">Premium</span></td>
+          <td style="color:var(--blue)">5</td>
+          <td style="color:var(--red)">R$ 120</td>
+          <td><span class="badge badge-bloqueado">Bloqueado</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button><button class="row-btn danger">Isentar</button></div></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Carlos Ferreira Lima</td>
+          <td style="font-family:monospace;font-size:11px">carlos.lima</td>
+          <td>carlos.lima@usp.br</td>
+          <td>Funcionário</td>
+          <td><span class="badge badge-plan">Gratuito</span></td>
+          <td style="color:var(--blue)">1</td>
+          <td style="color:var(--amber)">R$ 8</td>
+          <td><span class="badge badge-suspenso">Suspenso</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button><button class="row-btn">Reset</button></div></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Marina Costa Oliveira</td>
+          <td style="font-family:monospace;font-size:11px">marina.costa</td>
+          <td>marina.costa@usp.br</td>
+          <td>Aluna</td>
+          <td><span class="badge badge-plan gold">Premium</span></td>
+          <td style="color:var(--blue)">7</td>
+          <td style="color:var(--text3)">R$ 0</td>
+          <td><span class="badge badge-ativo">Ativo</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button><button class="row-btn">Reset</button></div></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Roberto Alves Nunes</td>
+          <td style="font-family:monospace;font-size:11px">roberto.alves</td>
+          <td>roberto.alves@usp.br</td>
+          <td>Externo</td>
+          <td><span class="badge badge-plan">Padrão</span></td>
+          <td style="color:var(--text3)">0</td>
+          <td style="color:var(--text3)">R$ 0</td>
+          <td><span class="badge badge-ativo">Ativo</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button><button class="row-btn">Reset</button></div></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Fernanda Rocha</td>
+          <td style="font-family:monospace;font-size:11px">fernanda.rocha</td>
+          <td>fernanda@usp.br</td>
+          <td>Aluna</td>
+          <td><span class="badge badge-plan">Gratuito</span></td>
+          <td style="color:var(--blue)">2</td>
+          <td style="color:var(--amber)">R$ 4</td>
+          <td><span class="badge badge-ativo">Ativo</span></td>
+          <td><div class="row-actions"><button class="row-btn primary">Ver</button><button class="row-btn">Editar</button></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DRAWER: detalhe do leitor -->
+<div class="drawer-overlay" id="drawer-overlay" style="display:none" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer" style="display:none">
+  <div class="drawer-head">
+    <h2>João da Silva Santos</h2>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-tabs">
+    <div class="dtab active" onclick="setDTab(0,this)">Perfil</div>
+    <div class="dtab" onclick="setDTab(1,this)">Histórico</div>
+    <div class="dtab" onclick="setDTab(2,this)">Pendências</div>
+  </div>
+
+  <!-- TAB 0: Perfil -->
+  <div class="drawer-body" id="dtab0">
+    <div class="leitor-profile">
+      <div class="profile-avatar">JS</div>
+      <div>
+        <div class="profile-name">João da Silva Santos</div>
+        <div class="profile-sub">joao.santos · Aluno · <span style="color:var(--green)">Ativo</span></div>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><label>E-mail</label><span>joao.santos@usp.br</span></div>
+      <div class="info-item"><label>Telefone</label><span>(11) 98765-4321</span></div>
+      <div class="info-item"><label>Vínculo</label><span>Aluno</span></div>
+      <div class="info-item"><label>Plano</label><span>Padrão (5 livros)</span></div>
+      <div class="info-item"><label>Cadastrado em</label><span>10/01/2025</span></div>
+      <div class="info-item"><label>Última atividade</label><span>01/04/2026</span></div>
+      <div class="info-item"><label>Livros ativos</label><span style="color:var(--blue)">3 de 5 disponíveis</span></div>
+      <div class="info-item"><label>Renovações usadas</label><span>1 de 3</span></div>
+    </div>
+    <div class="section-title" style="border-top:none;padding-top:0">Alterar status</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button style="flex:1;padding:8px;border-radius:7px;background:#1D9E7520;border:1px solid #1D9E7530;color:var(--green);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Ativo</button>
+      <button style="flex:1;padding:8px;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--text3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Suspender</button>
+      <button style="flex:1;padding:8px;border-radius:7px;background:transparent;border:1px solid var(--border);color:var(--text3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Bloquear</button>
+    </div>
+    <div class="section-title">Plano de assinatura</div>
+    <select style="width:100%;background:var(--bg0);border:1px solid var(--border);border-radius:7px;padding:9px 12px;font-size:12px;color:var(--text0);font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px">
+      <option>Padrão — 5 livros simultâneos</option>
+      <option>Gratuito — 2 livros simultâneos</option>
+      <option>Premium — 10 livros + descontos</option>
+    </select>
+  </div>
+
+  <!-- TAB 1: Histórico -->
+  <div class="drawer-body" id="dtab1" style="display:none">
+    <div class="hist-item">
+      <div class="hist-icon emp">E</div>
+      <div class="hist-text"><div class="hist-title">Dom Casmurro</div><div class="hist-sub">Emprestado em 20/03/2026 · Vence 03/04/2026</div></div>
+      <div class="hist-val">Ativo</div>
+    </div>
+    <div class="hist-item">
+      <div class="hist-icon emp">E</div>
+      <div class="hist-text"><div class="hist-title">Clean Code</div><div class="hist-sub">Emprestado em 18/03/2026 · Vence 01/04/2026</div></div>
+      <div class="hist-val" style="color:var(--amber)">Ativo</div>
+    </div>
+    <div class="hist-item">
+      <div class="hist-icon dev">D</div>
+      <div class="hist-text"><div class="hist-title">O Alquimista</div><div class="hist-sub">Devolvido em 15/03/2026 · No prazo</div></div>
+      <div class="hist-val" style="color:var(--green)">Devolvido</div>
+    </div>
+    <div class="hist-item">
+      <div class="hist-icon mul">M</div>
+      <div class="hist-text"><div class="hist-title">Multa — Refactoring</div><div class="hist-sub">Gerada em 10/03/2026 · 3 dias de atraso</div></div>
+      <div class="hist-val" style="color:var(--red)">R$ 3,00</div>
+    </div>
+    <div class="hist-item">
+      <div class="hist-icon dev">D</div>
+      <div class="hist-text"><div class="hist-title">Design Patterns</div><div class="hist-sub">Devolvido em 08/03/2026 · 3 dias de atraso</div></div>
+      <div class="hist-val" style="color:var(--red)">Atrasado</div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Pendências -->
+  <div class="drawer-body" id="dtab2" style="display:none">
+    <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text3)">Total de pendências</span>
+      <span style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--text0)">R$ 0,00</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;padding:24px">Nenhuma pendência financeira ativa para este leitor.</div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="df-btn">🔑 Reset Senha</button>
+    <button class="df-btn">✉ E-mail</button>
+    <button class="df-btn primary">Salvar alterações</button>
+  </div>
+</div>
+
+<script>
+function openDrawer(){
+  document.getElementById('drawer').style.display='flex';
+  document.getElementById('drawer-overlay').style.display='block';
+}
+function closeDrawer(){
+  document.getElementById('drawer').style.display='none';
+  document.getElementById('drawer-overlay').style.display='none';
+}
+function setDTab(i,el){
+  document.querySelectorAll('.dtab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  ['dtab0','dtab1','dtab2'].forEach((id,j)=>document.getElementById(id).style.display=j===i?'block':'none');
+}
+</script>
+</body>
+</html>
