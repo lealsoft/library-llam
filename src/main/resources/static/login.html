@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblio API - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            margin-top: 10px;
+            border: 2px solid #e1e5eb;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .security-info {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #0369a1;
+        }
+
+        .security-info strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .token-display {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .token-display h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .token-value {
+            background: #1e293b;
+            color: #22c55e;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            word-break: break-all;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e1e5eb;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .debug-panel {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            display: none;
+        }
+
+        .debug-panel h4 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+
+        .debug-panel .log-entry {
+            margin-bottom: 6px;
+            padding-left: 10px;
+            border-left: 2px solid #475569;
+        }
+
+        .debug-panel .log-entry.success {
+            border-left-color: #22c55e;
+        }
+
+        .debug-panel .log-entry.error {
+            border-left-color: #ef4444;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-group label {
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        /* Tela de usuario logado */
+        .logged-in-container {
+            display: none;
+        }
+
+        .logged-in-container.active {
+            display: block;
+        }
+
+        .login-container.hidden {
+            display: none;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .user-info h2 {
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .user-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .user-details-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e1e5eb;
+        }
+
+        .user-details-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-details-item label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .user-details-item span {
+            color: #333;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .session-info {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #92400e;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Biblio API</h1>
+            <p>Sistema de Gerenciamento de Biblioteca</p>
+        </div>
+
+        <div class="form-container">
+            <!-- Tela de Login/Registro -->
+            <div id="loginContainer" class="login-container">
+                <div class="security-info">
+                    <strong>Conexao Segura</strong>
+                    Suas credenciais sao criptografadas com RSA-2048 + AES-256-GCM (criptografia hibrida) antes de serem enviadas. A chave privada nunca sai do servidor.
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="login">Login</div>
+                    <div class="tab" data-tab="register">Registrar</div>
+                </div>
+
+                <div id="alert" class="alert"></div>
+
+                <!-- Login Form -->
+                <div id="login-tab" class="tab-content active">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginUsername">Login</label>
+                            <input type="text" id="loginUsername" placeholder="Digite seu login" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loginPassword">Senha</label>
+                            <input type="password" id="loginPassword" placeholder="Digite sua senha" required autocomplete="current-password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="loginBtn">
+                            Entrar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-tab" class="tab-content">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="registerName">Nome Completo</label>
+                            <input type="text" id="registerName" placeholder="Digite seu nome" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerUsername">Login</label>
+                            <input type="text" id="registerUsername" placeholder="Escolha um login" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="registerPassword">Senha</label>
+                            <input type="password" id="registerPassword" placeholder="Escolha uma senha" required autocomplete="new-password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="registerBtn">
+                            Registrar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tela de Usuario Logado -->
+            <div id="loggedInContainer" class="logged-in-container">
+                <div id="alertLoggedIn" class="alert"></div>
+                <div class="user-avatar" id="userAvatar">U</div>
+                
+                <div class="user-info">
+                    <h2 id="userName">Usuario</h2>
+                    <p id="userLogin">@login</p>
+                </div>
+
+                <div class="user-details">
+                    <div class="user-details-item">
+                        <label>ID</label>
+                        <span id="userId">-</span>
+                    </div>
+                    <div class="user-details-item">
+                        <label>Data de Criacao</label>
+                        <span id="userCreatedAt">-</span>
+                    </div>
+                    <div class="user-details-item">
+                        <label>Status</label>
+                        <span style="color: #059669;">Autenticado</span>
+                    </div>
+                </div>
+
+                <div class="session-info">
+                    <strong>Sessao ativa</strong><br>
+                    Token expira em <span id="tokenExpiry">15</span> minutos. Use o botao "Renovar Sessao" para estender.
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="testProtectedEndpoint()">Testar API</button>
+                    <button class="btn btn-secondary" onclick="refreshSession()">Renovar Sessao</button>
+                </div>
+
+                <button class="btn btn-danger" onclick="logout()">Sair</button>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="showDebug">
+                <label for="showDebug">Mostrar painel de debug</label>
+            </div>
+
+            <div id="tokenDisplay" class="token-display">
+                <h3>Access Token (JWT)</h3>
+                <div id="tokenValue" class="token-value"></div>
+                <button class="btn btn-secondary" onclick="copyToken()">Copiar Token</button>
+            </div>
+
+            <div id="debugPanel" class="debug-panel">
+                <h4>Debug Log</h4>
+                <div id="debugLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuracao
+        const API_BASE_URL = 'http://localhost:8080';
+
+        // Estado
+        let currentAccessToken = null;
+        let currentRefreshToken = null;
+        let currentUser = null;
+        let rsaPublicKey = null;
+
+        // Funcao auxiliar para converter ArrayBuffer para Base64
+        // btoa(String.fromCharCode(...array)) falha com arrays grandes
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        // Utilitarios de Debug
+        function log(message, type = 'info') {
+            const debugLog = document.getElementById('debugLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            debugLog.appendChild(entry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Busca chave publica RSA do servidor
+        async function fetchPublicKey() {
+            try {
+                log('Buscando chave publica RSA do servidor...');
+                const response = await fetch(`${API_BASE_URL}/api/crypto/public-key`);
+                
+                if (!response.ok) {
+                    throw new Error('Falha ao buscar chave publica');
+                }
+                
+                const data = await response.json();
+                const publicKeyBase64 = data.publicKey;
+                
+                // Converte Base64 para ArrayBuffer
+                const binaryString = atob(publicKeyBase64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Importa chave publica RSA
+                rsaPublicKey = await crypto.subtle.importKey(
+                    'spki',
+                    bytes.buffer,
+                    {
+                        name: 'RSA-OAEP',
+                        hash: 'SHA-256'
+                    },
+                    false,
+                    ['encrypt']
+                );
+                
+                log('Chave publica RSA carregada com sucesso', 'success');
+                return rsaPublicKey;
+            } catch (error) {
+                log(`Erro ao buscar chave publica: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Criptografia Hibrida: RSA + AES
+        // 1. Gera chave AES aleatoria
+        // 2. Criptografa dados com AES-GCM
+        // 3. Criptografa chave AES com RSA publica
+        // Formato: Base64(encryptedAesKey) + "." + Base64(IV + CipherText)
+        async function encryptHybrid(plainText) {
+            try {
+                // Sempre busca nova chave para evitar problemas de cache
+                await fetchPublicKey();
+                
+                log(`Criptografando: "${plainText.substring(0, 3)}***"`);
+                
+                // 1. Gera chave AES aleatoria de 256 bits
+                const aesKey = await crypto.subtle.generateKey(
+                    { name: 'AES-GCM', length: 256 },
+                    true,
+                    ['encrypt']
+                );
+                
+                // 2. Criptografa dados com AES-GCM
+                const encoder = new TextEncoder();
+                const data = encoder.encode(plainText);
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                
+                const encryptedData = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: iv, tagLength: 128 },
+                    aesKey,
+                    data
+                );
+                
+                // Concatena IV + CipherText
+                const combined = new Uint8Array(iv.length + encryptedData.byteLength);
+                combined.set(iv, 0);
+                combined.set(new Uint8Array(encryptedData), iv.length);
+                const encryptedDataBase64 = arrayBufferToBase64(combined);
+                
+                // 3. Exporta e criptografa chave AES com RSA-OAEP (SHA-256)
+                const rawAesKey = await crypto.subtle.exportKey('raw', aesKey);
+                const encryptedAesKey = await crypto.subtle.encrypt(
+                    { name: 'RSA-OAEP' },
+                    rsaPublicKey,
+                    rawAesKey
+                );
+                const encryptedAesKeyBase64 = arrayBufferToBase64(encryptedAesKey);
+                
+                // Formato hibrido: encryptedKey.encryptedData
+                const result = `${encryptedAesKeyBase64}.${encryptedDataBase64}`;
+                
+                log('Criptografia hibrida RSA+AES concluida', 'success');
+                return result;
+            } catch (error) {
+                log(`Erro na criptografia: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Funcoes de UI
+        function showAlert(message, type) {
+            // Determina qual alerta mostrar baseado na tela ativa
+            const isLoggedIn = document.getElementById('loggedInContainer').classList.contains('active');
+            const alertId = isLoggedIn ? 'alertLoggedIn' : 'alert';
+            const alert = document.getElementById(alertId);
+            
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function hideAlert() {
+            document.getElementById('alert').style.display = 'none';
+            document.getElementById('alertLoggedIn').style.display = 'none';
+        }
+
+        function setLoading(buttonId, loading) {
+            const btn = document.getElementById(buttonId);
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span>Processando...';
+            } else {
+                btn.disabled = false;
+                btn.textContent = buttonId === 'loginBtn' ? 'Entrar' : 'Registrar';
+            }
+        }
+
+        function showToken(accessToken) {
+            currentAccessToken = accessToken;
+            document.getElementById('tokenValue').textContent = accessToken;
+            document.getElementById('tokenDisplay').style.display = 'block';
+        }
+
+        // Mostra tela de usuario logado
+        function showLoggedInScreen(user, expiresIn) {
+            currentUser = user;
+            
+            // Atualiza informacoes do usuario
+            document.getElementById('userAvatar').textContent = user.nome.charAt(0).toUpperCase();
+            document.getElementById('userName').textContent = user.nome;
+            document.getElementById('userLogin').textContent = `@${user.login}`;
+            document.getElementById('userId').textContent = user.id;
+            document.getElementById('userCreatedAt').textContent = formatDate(user.dataCriacao);
+            document.getElementById('tokenExpiry').textContent = Math.floor(expiresIn / 60);
+            
+            // Esconde tela de login e mostra tela de usuario logado
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('loggedInContainer').classList.add('active');
+            
+            log(`Usuario ${user.nome} logado com sucesso`, 'success');
+        }
+
+        // Volta para tela de login
+        function showLoginScreen() {
+            currentAccessToken = null;
+            currentRefreshToken = null;
+            currentUser = null;
+            
+            // Esconde tela de usuario logado e mostra tela de login
+            document.getElementById('loggedInContainer').classList.remove('active');
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('tokenDisplay').style.display = 'none';
+            
+            // Limpa formularios
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+            
+            log('Sessao encerrada', 'info');
+        }
+
+        // Formata data para exibicao
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Logout
+        async function logout() {
+            log('Realizando logout...');
+            
+            try {
+                if (currentRefreshToken && currentAccessToken) {
+                    await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentAccessToken}`
+                        },
+                        body: JSON.stringify({
+                            refreshToken: currentRefreshToken
+                        })
+                    });
+                }
+                log('Logout realizado com sucesso', 'success');
+            } catch (error) {
+                log(`Erro no logout: ${error.message}`, 'error');
+            }
+            
+            showLoginScreen();
+        }
+
+        // Renovar sessao
+        async function refreshSession() {
+            if (!currentRefreshToken) {
+                showAlert('Sessao expirada. Faca login novamente.', 'error');
+                showLoginScreen();
+                return;
+            }
+            
+            log('Renovando sessao...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        refreshToken: currentRefreshToken
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Falha ao renovar sessao');
+                }
+                
+                const data = await response.json();
+                currentAccessToken = data.accessToken;
+                currentRefreshToken = data.refreshToken;
+                document.getElementById('tokenValue').textContent = data.accessToken;
+                document.getElementById('tokenExpiry').textContent = Math.floor(data.expiraEm / 60);
+                
+                log('Sessao renovada com sucesso!', 'success');
+                showAlert('Sessao renovada com sucesso!', 'success');
+            } catch (error) {
+                log(`Erro ao renovar sessao: ${error.message}`, 'error');
+                showAlert('Sessao expirada. Faca login novamente.', 'error');
+                showLoginScreen();
+            }
+        }
+
+        function copyToken() {
+            if (currentAccessToken) {
+                navigator.clipboard.writeText(currentAccessToken).then(() => {
+                    showAlert('Token copiado para a area de transferencia!', 'success');
+                });
+            }
+        }
+
+        // Funcoes de API
+        async function login(username, password) {
+            log('Iniciando processo de login...');
+            
+            // Criptografa credenciais com RSA+AES hibrido
+            const loginCriptografado = await encryptHybrid(username);
+            const senhaCriptografada = await encryptHybrid(password);
+            
+            log('Enviando requisicao para /api/auth/login');
+            
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    loginCriptografado,
+                    senhaCriptografada
+                })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao fazer login');
+            }
+
+            log('Login realizado com sucesso!', 'success');
+            return data;
+        }
+
+        async function register(nome, username, password) {
+            log('Iniciando processo de registro...');
+            
+            // Criptografa apenas a senha com RSA+AES hibrido
+            const senhaCriptografada = await encryptHybrid(password);
+            
+            log('Enviando requisicao para /api/auth/registrar');
+            
+            const response = await fetch(`${API_BASE_URL}/api/auth/registrar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome,
+                    login: username,
+                    senhaCriptografada
+                })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao registrar');
+            }
+
+            log('Registro realizado com sucesso!', 'success');
+            return data;
+        }
+
+        async function testProtectedEndpoint() {
+            if (!currentAccessToken) {
+                showAlert('Faca login primeiro', 'error');
+                return;
+            }
+
+            log('Testando endpoint protegido /api/emprestimos...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/emprestimos`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentAccessToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Endpoint protegido acessado! ${data.length} emprestimos encontrados.`, 'success');
+                    showAlert(`Acesso autorizado! ${data.length} emprestimos encontrados.`, 'success');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Acesso negado');
+                }
+            } catch (error) {
+                log(`Erro ao acessar endpoint: ${error.message}`, 'error');
+                showAlert(error.message, 'error');
+            }
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                hideAlert();
+            });
+        });
+
+        document.getElementById('showDebug').addEventListener('change', (e) => {
+            document.getElementById('debugPanel').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            setLoading('loginBtn', true);
+            
+            try {
+                const result = await login(username, password);
+                currentAccessToken = result.accessToken;
+                currentRefreshToken = result.refreshToken;
+                showToken(result.accessToken);
+                showLoggedInScreen(result.usuario, result.expiraEm);
+            } catch (error) {
+                showAlert(error.message, 'error');
+                log(error.message, 'error');
+            } finally {
+                setLoading('loginBtn', false);
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            
+            const nome = document.getElementById('registerName').value;
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            setLoading('registerBtn', true);
+            
+            try {
+                const result = await register(nome, username, password);
+                currentAccessToken = result.accessToken;
+                currentRefreshToken = result.refreshToken;
+                showToken(result.accessToken);
+                showLoggedInScreen(result.usuario, result.expiraEm);
+            } catch (error) {
+                showAlert(error.message, 'error');
+                log(error.message, 'error');
+            } finally {
+                setLoading('registerBtn', false);
+            }
+        });
+
+        // Inicializacao
+        log('Pagina de login inicializada');
+        log(`API URL: ${API_BASE_URL}`);
+        log('Criptografia: RSA-2048 + AES-256-GCM (Hibrida)');
+        
+        // Pre-carrega chave publica RSA
+        fetchPublicKey().catch(() => {
+            log('Chave publica sera carregada no primeiro uso', 'info');
+        });
+    </script>
+</body>
+</html>

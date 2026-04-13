@@ -1,0 +1,924 @@
+{
+  "info": {
+    "_postman_id": "biblio-api-collection",
+    "name": "Biblio API - Desafio Capgemini",
+    "description": "Collection para testar a API de Biblioteca com JWT Authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "loginCriptografado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senhaCriptografada",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuarioId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "livroId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "emprestimoId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Criptografia",
+      "item": [
+        {
+          "name": "1.1 Criptografar Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('loginCriptografado', jsonData.criptografado);",
+                  "pm.test('Login criptografado com sucesso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.criptografado).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"novo.usuario\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crypto/encrypt",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crypto", "encrypt"]
+            },
+            "description": "Criptografa o login para uso nos endpoints"
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Criptografar Senha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('senhaCriptografada', jsonData.criptografado);",
+                  "pm.test('Senha criptografada com sucesso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.criptografado).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texto\": \"MinhaSenha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/crypto/encrypt",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "crypto", "encrypt"]
+            },
+            "description": "Criptografa a senha para uso nos endpoints"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Autenticacao JWT",
+      "item": [
+        {
+          "name": "2.1 Registrar Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "pm.test('Usuario registrado com sucesso', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.refreshToken).to.be.a('string');",
+                  "    pm.expect(jsonData.tokenType).to.equal('Bearer');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Novo Usuario\",\n  \"loginCriptografado\": \"{{loginCriptografado}}\",\n  \"senhaCriptografada\": \"{{senhaCriptografada}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registra novo usuario e retorna tokens JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "2.2 Login - Senha INCORRETA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Deve retornar erro 401 para senha incorreta', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "pm.test('Mensagem de erro', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('Credenciais');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('baseUrl') + '/api/crypto/encrypt',",
+                  "    method: 'POST',",
+                  "    header: { 'Content-Type': 'application/json' },",
+                  "    body: { mode: 'raw', raw: JSON.stringify({ texto: 'SenhaErrada@999' }) }",
+                  "}, function (err, res) {",
+                  "    pm.collectionVariables.set('senhaErradaCriptografada', res.json().criptografado);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginCriptografado\": \"{{loginCriptografado}}\",\n  \"senhaCriptografada\": \"{{senhaErradaCriptografada}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Tenta login com senha incorreta - deve falhar"
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Login - Credenciais CORRETAS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "pm.test('Login bem sucedido', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Retorna tokens JWT', function () {",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.refreshToken).to.be.a('string');",
+                  "    pm.expect(jsonData.tokenType).to.equal('Bearer');",
+                  "    pm.expect(jsonData.expiresIn).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loginCriptografado\": \"{{loginCriptografado}}\",\n  \"senhaCriptografada\": \"{{senhaCriptografada}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login com credenciais corretas - retorna JWT tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', jsonData.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', jsonData.refreshToken);",
+                  "pm.test('Token renovado com sucesso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.accessToken).to.be.a('string');",
+                  "    pm.expect(jsonData.refreshToken).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Renova o access token usando o refresh token"
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout bem sucedido', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Faz logout invalidando o refresh token e blacklistando o access token"
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Logout All Sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout de todas sessoes bem sucedido', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout-all"]
+            },
+            "description": "Faz logout de todas as sessoes do usuario"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Livros",
+      "item": [
+        {
+          "name": "3.1 Listar Livros (Recentes)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de livros retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.length > 0) {",
+                  "    pm.collectionVariables.set('livroId', jsonData[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros"]
+            },
+            "description": "Lista todos os livros ordenados por data de cadastro (mais recentes)"
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Listar Livros (Populares)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de livros populares retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros?ordenacao=populares",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros"],
+              "query": [
+                {
+                  "key": "ordenacao",
+                  "value": "populares"
+                }
+              ]
+            },
+            "description": "Lista livros ordenados por quantidade de emprestimos"
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Listar Livros (Titulo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de livros por titulo retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros?ordenacao=titulo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros"],
+              "query": [
+                {
+                  "key": "ordenacao",
+                  "value": "titulo"
+                }
+              ]
+            },
+            "description": "Lista livros ordenados alfabeticamente por titulo"
+          },
+          "response": []
+        },
+        {
+          "name": "3.4 Listar Livros Disponiveis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de livros disponiveis retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    jsonData.forEach(function(livro) {",
+                  "        pm.expect(livro.status).to.equal('DISPONIVEL');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros/disponiveis",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros", "disponiveis"]
+            },
+            "description": "Lista apenas livros com status DISPONIVEL"
+          },
+          "response": []
+        },
+        {
+          "name": "3.5 Buscar Livro por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Livro encontrado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.be.a('number');",
+                  "    pm.expect(jsonData.titulo).to.be.a('string');",
+                  "    pm.expect(jsonData.autor).to.be.a('string');",
+                  "    pm.expect(jsonData.isbn).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros/{{livroId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros", "{{livroId}}"]
+            },
+            "description": "Busca um livro especifico por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "3.6 Cadastrar Livro (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('livroId', jsonData.id);",
+                  "}",
+                  "pm.test('Livro cadastrado com sucesso', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.titulo).to.equal('Effective Java');",
+                  "    pm.expect(jsonData.status).to.equal('DISPONIVEL');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Effective Java\",\n  \"autor\": \"Joshua Bloch\",\n  \"isbn\": \"978-0134685991\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/livros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros"]
+            },
+            "description": "Cadastra novo livro (requer autenticacao JWT)"
+          },
+          "response": []
+        },
+        {
+          "name": "3.7 Deletar Livro (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Livro deletado com sucesso', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/livros/{{livroId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "livros", "{{livroId}}"]
+            },
+            "description": "Deleta livro (requer JWT, livro deve estar disponivel)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Emprestimos",
+      "item": [
+        {
+          "name": "4.1 Listar Emprestimos (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de emprestimos retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/emprestimos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "emprestimos"]
+            },
+            "description": "Lista todos os emprestimos (requer JWT)"
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Realizar Emprestimo (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('emprestimoId', jsonData.id);",
+                  "}",
+                  "pm.test('Emprestimo realizado com sucesso', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.status).to.equal('EM_ANDAMENTO');",
+                  "    pm.expect(jsonData.livro).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuarioId\": 1,\n  \"livroId\": {{livroId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/emprestimos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "emprestimos"]
+            },
+            "description": "Realiza emprestimo de livro para usuario (requer JWT)"
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Buscar Emprestimo por ID (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Emprestimo encontrado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.be.a('number');",
+                  "    pm.expect(jsonData.livro).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/emprestimos/{{emprestimoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "emprestimos", "{{emprestimoId}}"]
+            },
+            "description": "Busca emprestimo por ID (requer JWT)"
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Devolver Livro (JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Devolucao realizada com sucesso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.equal('FINALIZADO');",
+                  "    pm.expect(jsonData.dataDevolucao).to.not.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/emprestimos/{{emprestimoId}}/devolver",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "emprestimos", "{{emprestimoId}}", "devolver"]
+            },
+            "description": "Registra devolucao de livro (requer JWT)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Admin (DEV only)",
+      "item": [
+        {
+          "name": "5.1 Blacklist Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Info da blacklist retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.size).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/blacklist/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "blacklist", "info"]
+            },
+            "description": "Retorna informacoes da blacklist de tokens (apenas em DEV)"
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 Rate Limit - Login IPs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de IPs com rate limit retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.count).to.be.a('number');",
+                  "    pm.expect(jsonData.buckets).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/ratelimit/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "ratelimit", "login"]
+            },
+            "description": "Lista todos os IPs com rate limit de login (apenas em DEV)"
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 Rate Limit - General IPs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Lista de IPs com rate limit geral retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.count).to.be.a('number');",
+                  "    pm.expect(jsonData.buckets).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/ratelimit/general",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "ratelimit", "general"]
+            },
+            "description": "Lista todos os IPs com rate limit geral (apenas em DEV)"
+          },
+          "response": []
+        },
+        {
+          "name": "5.4 Rate Limit - Check IP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Info do IP retornada', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.ip).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/ratelimit/login/127.0.0.1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "ratelimit", "login", "127.0.0.1"]
+            },
+            "description": "Verifica rate limit de um IP especifico (apenas em DEV)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
